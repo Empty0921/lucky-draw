@@ -9,14 +9,33 @@
         抽奖配置
       </el-button>
     </header>
-    <div id="main" :class="{ mask: showRes }"></div>
+    <div id="main" :class="{ mask: showRes }">
+      <div class="loader">
+        <span class="lo1"></span>
+        <span class="lo2"></span>
+        <span class="lo1"></span>
+        <span class="lo3"></span>
+        <span class="lo1"></span>
+        <span class="lo2"></span>
+        <span class="lo3"></span>
+      </div>  
+      <div class="loader2">
+        <span class="lo1"></span>
+        <span class="lo2"></span>
+        <span class="lo1"></span>
+        <span class="lo3"></span>
+        <span class="lo1"></span>
+        <span class="lo2"></span>
+        <span class="lo3"></span>
+      </div>  
+    </div>
     <div id="tags">
       <ul v-for="item in datas" :key="item.key">
         <li>
           <a
             href="javascript:void(0);"
             :style="{
-              color: '#fff',
+              color: '#fff'                         
             }"
           >
             {{ item.name ? item.name : item.key }}
@@ -93,7 +112,7 @@
     <Result :visible.sync="showResult"></Result>
 
     <span class="copy-right">
-      Copyright©zhangyongfeng5350@gmail.com
+      
     </span>
 
     <audio
@@ -133,6 +152,7 @@ export default {
   components: { LotteryConfig, Publicity, Tool, Result },
 
   computed: {
+    // 抽獎結果卡片樣式
     resCardStyle() {
       const style = { fontSize: '30px' };
       const { number } = this.config;
@@ -172,13 +192,30 @@ export default {
       return allresult;
     },
     datas() {
+      // 1:单人抽奖 5:5人抽奖 10:10人抽奖 0:全部抽奖 99:指定人数抽奖
+      let wons=[];
+      for(const key in this.$store.state.result)
+      {
+        for(const item in this.$store.state.result[key])
+        {
+          wons.push(Number(this.$store.state.result[key][item]));
+          //console.log(`key:${key},value:${this.$store.state.result[key]},item:${item}`);
+        }
+        //wons.push(Number(this.$store.state.result[key]));
+        //exconsole.log(`key:${key},value:${this.$store.state.result[key]}`);
+      }
+
       const { number } = this.config;
-      const nums = number >= 1500 ? 500 : this.config.number;
+      const nums = number >= 1500 ? 500 : this.config.number;      
       const configNum = number > 1500 ? Math.floor(number / 3) : number;
+      console.log(`wons:${wons},nums:${nums},configNum:${configNum}}`);
       const randomShowNums = luckydrawHandler(configNum, [], nums);
-      const randomShowDatas = randomShowNums.map((item) => {
+      // 排除已中獎的號碼
+      console.log(`randomShowNums:${randomShowNums},randomShowNums.filter${randomShowNums.filter(item => !wons.includes(item))}`);
+      const randomShowDatas = randomShowNums.filter(item => !wons.includes(item)).map((item) => {
         const listData = this.list.find((d) => d.key === item);
         const photo = this.photos.find((d) => d.id === item);
+      
         return {
           key: item * (number > 1500 ? 3 : 1),
           name: listData ? listData.name : '',
@@ -199,8 +236,9 @@ export default {
     if (data) {
       this.$store.commit('setConfig', Object.assign({}, data));
     }
-    const result = getData(resultField);
+    const result = getData(resultField);    
     if (result) {
+      // 寫入store 中獎結果
       this.$store.commit('setResult', result);
     }
 
@@ -244,7 +282,8 @@ export default {
       },
     },
   },
-  mounted() {
+  mounted() { 
+    // 初始化canvas
     this.startTagCanvas();
     setTimeout(() => {
       this.getPhoto();
@@ -252,6 +291,7 @@ export default {
     window.addEventListener('resize', this.reportWindowSize);
   },
   beforeDestroy() {
+    // 退出时销毁canvas
     window.removeEventListener('resize', this.reportWindowSize);
   },
   methods: {
@@ -289,34 +329,60 @@ export default {
       });
     },
     speed() {
-      return [0.1 * Math.random() + 0.01, -(0.1 * Math.random() + 0.01)];
+      // canvas 速度
+      const speed=[0.5 * Math.random() + 0.01, -(0.5 * Math.random() + 0.01)]
+      return speed;
     },
     createCanvas() {
-      const canvas = document.createElement('canvas');
+      // 创建canvas
+      const canvas = document.createElement('canvas');      
+      canvas.style.position = 'absolute';
+      canvas.style.zIndex = 10;
       canvas.width = document.body.offsetWidth;
       canvas.height = document.body.offsetHeight;
       canvas.id = 'rootcanvas';
       this.$el.querySelector('#main').appendChild(canvas);
     },
     startTagCanvas() {
+      // 开始canvas
       this.createCanvas();
       const { speed } = this;
+      
       window.TagCanvas.Start('rootcanvas', 'tags', {
         textColour: null,
         initial: speed(),
+        reverse: true,
         dragControl: 1,
-        textHeight: 20,
+        textHeight: 90,        
         noSelect: true,
         lock: 'xy',
       });
+      
+      const { number } = this.config;
+      if(number>0 && number<=10){
+        window.TagCanvas.textHeight = 90;
+      }else 
+      {
+        window.TagCanvas.textHeight = 40;
+      }
+      
     },
     reloadTagCanvas() {
+      
+      const { number } = this.config;      
+      if(number>0 && number<=10){
+        window.TagCanvas.textHeight = 90;
+      }else 
+      {
+        window.TagCanvas.textHeight = 40;
+      }
       window.TagCanvas.Reload('rootcanvas');
     },
     closeRes() {
       this.showRes = false;
     },
     toggle(form) {
+      // 开始抽奖
       const { speed, config } = this;
       if (this.running) {
         this.audioSrc = bgaudio;
@@ -340,13 +406,15 @@ export default {
         const { number } = config;
         const { category, mode, qty, remain, allin } = form;
         let num = 1;
-        if (mode === 1 || mode === 5) {
+        // 1:单人抽奖 5:5人抽奖 10:10人抽奖 0:全部抽奖 99:指定人数抽奖
+        if (mode === 1 || mode === 5|| mode === 10) {
           num = mode;
         } else if (mode === 0) {
           num = remain;
         } else if (mode === 99) {
           num = qty;
         }
+        // 生成抽奖结果
         const resArr = luckydrawHandler(
           number,
           allin ? [] : this.allresult,
@@ -363,7 +431,7 @@ export default {
           [category]: oldRes.concat(resArr),
         });
         this.result = data;
-        window.TagCanvas.SetSpeed('rootcanvas', [5, 1]);
+        window.TagCanvas.SetSpeed('rootcanvas', [8, 5]);
         this.running = !this.running;
       }
     },
@@ -374,11 +442,12 @@ export default {
 #root {
   height: 100%;
   position: relative;
-  background-image: url('./assets/bg1.jpg');
-  background-size: 100% 100%;
+   background-image: url('./assets/bg.jpg');
+   background-size: 100% 100%;
   background-position: center center;
   background-repeat: no-repeat;
-  background-color: #121936;
+  //background-color: #121936;
+  background-color: #fff;
   .mask {
     -webkit-filter: blur(5px);
     filter: blur(5px);
@@ -484,6 +553,183 @@ export default {
       // border-radius: 50%;
       z-index: 1;
     }
+  }
+}
+
+.loader  {
+    text-align: left;
+    span.lo1 {
+        display: inline-block;
+        margin: -280px 40px 54px  -34px;
+        background:url("./assets/1000money.png");
+        //background-size: contain;
+        background-size: 100% 100%;
+        -webkit-animation: loader 10s infinite  linear;
+        -moz-animation: loader 10s infinite  linear;        
+    }
+    span.lo2 {
+        display: inline-block;
+        height: 80px;
+        margin: -280px 40px 54px  -34px;
+        background:url("./assets/ablecom_nocove.png");
+        //background-size: contain;
+        background-size: 100% 100%;
+        -webkit-animation: loader 10s infinite  linear;
+        -moz-animation: loader 10s infinite  linear;        
+    }
+    span.lo3 {
+        display: inline-block;
+        height: 80px;
+        margin: -280px 40px 54px  -34px;
+        background:url("./assets/ableplus_nocove.png");
+        //background-size: contain;
+        background-size: 100% 100%;
+        -webkit-animation: loader 10s infinite  linear;
+        -moz-animation: loader 10s infinite  linear;        
+    }
+    span:nth-child(5n+5) {
+        -webkit-animation-delay: 1.3s;
+        -moz-animation-delay: 1.3s;
+    }
+    span:nth-child(3n+2) {
+        -webkit-animation-delay: 1.5s;
+        -moz-animation-delay: 1.5s;
+    }
+    span:nth-child(2n+5) {
+        -webkit-animation-delay: 1.7s;
+        -moz-animation-delay: 1.7s;
+    }
+    span:nth-child(3n+10) {
+        -webkit-animation-delay: 2.7s;
+        -moz-animation-delay: 2.7s;
+    }
+    span:nth-child(4n+5) {
+        -webkit-animation-delay: 3.5s;
+        -moz-animation-delay: 3.5s;
+    }
+    span:nth-child(3n+7) {
+        -webkit-animation-delay: 8s;
+        -moz-animation-delay: 8s;
+    }
+    span:nth-child(7n+2) {
+        -webkit-animation-delay: 3.5s;
+        -moz-animation-delay: 3.5s;
+    }
+}
+
+.loader2  {
+    text-align: right;
+    span.lo1 {
+        display: inline-block;
+        margin: -280px 40px 54px  -34px;
+        background:url("./assets/1000money.png");
+        //background-size: contain;
+        background-size: 100% 100%;
+        -webkit-animation: loader 10s infinite  linear;
+        -moz-animation: loader 10s infinite  linear;        
+    }
+    span.lo2 {
+        display: inline-block;
+        height: 80px;
+        margin: -280px 40px 54px  -34px;
+        background:url("./assets/ablecom_nocove.png");
+        //background-size: contain;
+        background-size: 100% 100%;
+        -webkit-animation: loader 10s infinite  linear;
+        -moz-animation: loader 10s infinite  linear;        
+    }
+    span.lo3 {
+        display: inline-block;
+        height: 80px;
+        margin: -280px 40px 54px  -34px;
+        background:url("./assets/ableplus_nocove.png");
+        //background-size: contain;
+        background-size: 100% 100%;
+        -webkit-animation: loader 10s infinite  linear;
+        -moz-animation: loader 10s infinite  linear;        
+    }
+    // span {
+    //     display: inline-block;
+    //     margin: -280px 40px 54px  -34px;
+    //     background:url("./assets/1000money.png");
+    //     background-size: 100% 100%;
+    //     -webkit-animation: loader 10s infinite  linear;
+    //     -moz-animation: loader 10s infinite  linear;        
+    // }
+    span:nth-child(5n+5) {
+        -webkit-animation-delay: 1.3s;
+        -moz-animation-delay: 1.3s;
+    }
+    span:nth-child(3n+2) {
+        -webkit-animation-delay: 1.5s;
+        -moz-animation-delay: 1.5s;
+    }
+    span:nth-child(2n+5) {
+        -webkit-animation-delay: 1.7s;
+        -moz-animation-delay: 1.7s;
+    }
+    span:nth-child(3n+10) {
+        -webkit-animation-delay: 2.7s;
+        -moz-animation-delay: 2.7s;
+    }
+    span:nth-child(4n+5) {
+        -webkit-animation-delay: 3.5s;
+        -moz-animation-delay: 3.5s;
+    }
+    span:nth-child(3n+7) {
+        -webkit-animation-delay: 8s;
+        -moz-animation-delay: 8s;
+    }
+    span:nth-child(7n+2) {
+        -webkit-animation-delay: 3.5s;
+        -moz-animation-delay: 3.5s;
+    }
+}
+
+@-webkit-keyframes loader {
+  0% {
+    width: 80px;
+    height: 60px;
+    opacity: 1;
+
+	-webkit-transform: translate(0, 0px) rotateZ(0deg);
+  }
+  75% {
+    width: 80px;
+    height: 60px;
+    opacity: 1;
+
+	-webkit-transform: translate(100px, 600px) rotateZ(270deg); 
+  }
+  100% {
+    width: 80px;
+    height: 60px;
+    opacity: 0;
+
+	-webkit-transform: translate(150px, 800px) rotateZ(360deg);
+  }
+}
+@-moz-keyframes loader2 {
+  0% {
+    width: 80px;
+    height: 60px;
+    opacity: 1;
+    
+	-webkit-transform: translate(0, 0px) rotateZ(0deg);
+  }
+  75% {
+    width: 80px;
+    height: 60px;
+    opacity: 1;
+   
+	-webkit-transform: translate(100px, 600px) rotateZ(270deg); 
+  }
+  100% {
+    width: 80px;
+    height: 60px;
+    opacity: 0;
+    
+	-webkit-transform: translate(150px, 800px) rotateZ(360deg);
   }
 }
 </style>
