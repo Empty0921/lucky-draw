@@ -10,4 +10,4 @@ RUN yarn install
 
 #RUN npm install
 
-#CMD [ "yarn", "dev" ]
+#CMD [ "yarn", "serve" ]

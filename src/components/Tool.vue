@@ -1,6 +1,6 @@
 <template>
   <div id="tool">
-    <el-button @click="startHandler" type="primary" size="mini">{{
+    <el-button @click="startHandler" type="primary" size="medium" class="btnprimary">{{
       running ? '停止' : '開始'
     }}</el-button>
     <el-button size="mini" @click="showRemoveoptions = true">
@@ -8,6 +8,9 @@
     </el-button>
     <el-button size="mini" @click="showImport = true">
       導入名單
+    </el-button>
+    <el-button size="mini" @click="sequenceDownload">
+      匯出中獎名單
     </el-button>
     <!-- <el-button size="mini" @click="showImportphoto = true" >
       导入照片
@@ -165,6 +168,7 @@ export default {
     result() {
       return this.$store.state.result;
     },
+    
     categorys() {
       const options = [];
       for (const key in this.config) {
@@ -324,6 +328,41 @@ export default {
       this.$nextTick(() => {
         this.$emit('resetConfig');
       });
+    },
+    sequenceDownload() {
+      let content='';
+      const result=this.$store.state.result;
+      const list=this.$store.state.list;
+      //console.log(`list:${list.find(x=>x.key===58).name}`);
+      for (const key in result) {
+        
+        //獎項名稱
+        let name = conversionCategoryName(key); 
+        content+=name + '\r\n';
+        // 中獎內容
+        const element = this.result[key]; 
+        if(element.length>0){
+          Object.keys(element).forEach(item=>{
+            const resultuser=Number(element[item]);
+            content+=resultuser+':'+(list.length>0?list.find(x=>x.key===resultuser)==undefined?'':list.find(x=>x.key===resultuser).name:'') + '\r\n';
+            //console.log(`resultuser:${resultuser},list.find(x=>x.key===resultuser):${list.find(x=>x.key===resultuser).name}`);
+          });        
+        }
+
+        //const user=list.length>0?list.find(x=>x.key===element)==undefined?'':list.find(x=>x.key===element).name:'';
+        //console.log(`element:${element},user:${user}`);
+      }
+      
+      
+      if(content==undefined||content==''){
+          this.$message.warning('暂无导出数据！')
+      }else{
+        const element = document.createElement('a')
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content))
+        element.setAttribute('download', 'result')
+        element.style.display = 'none'
+        element.click()
+      }
     }
   }
 };
@@ -332,7 +371,7 @@ export default {
 #tool {
   z-index: 10;
   position: fixed;
-  width: 60px;
+  // width: 60px;
   top: 50%;
   right: 20px;
   transform: translateY(-50%);
@@ -369,5 +408,24 @@ export default {
   .el-radio.is-bordered {
     margin-bottom: 10px;
   }
+}
+.btnprimary{
+  padding: 20px 20px !important;
+  font-size: 40px !important;
+  border-radius: 30px !important;
+  margin-bottom: 60px !important;
+  //animation: blinkAndChangeColor 5s linear infinite;
+}
+@keyframes blinkAndChangeColor {
+    0%, 100% { 
+        opacity: 1; 
+        background-color: 	#003D79; 
+        color: #fff;
+    }
+    50% { 
+        opacity: 0.15; 
+        background-color: #842B00;
+        color: #000;
+    }
 }
 </style>

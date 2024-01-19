@@ -211,7 +211,7 @@ export default {
       console.log(`wons:${wons},nums:${nums},configNum:${configNum}}`);
       const randomShowNums = luckydrawHandler(configNum, [], nums);
       // 排除已中獎的號碼
-      console.log(`randomShowNums:${randomShowNums},randomShowNums.filter${randomShowNums.filter(item => !wons.includes(item))}`);
+      //console.log(`randomShowNums:${randomShowNums},randomShowNums.filter${randomShowNums.filter(item => !wons.includes(item))}`);
       const randomShowDatas = randomShowNums.filter(item => !wons.includes(item)).map((item) => {
         const listData = this.list.find((d) => d.key === item);
         const photo = this.photos.find((d) => d.id === item);
@@ -330,7 +330,7 @@ export default {
     },
     speed() {
       // canvas 速度
-      const speed=[0.5 * Math.random() + 0.01, -(0.5 * Math.random() + 0.01)]
+      const speed=[0.2 * Math.random() + 0.01, -(0.2 * Math.random() + 0.01)]
       return speed;
     },
     createCanvas() {
@@ -353,7 +353,7 @@ export default {
         initial: speed(),
         reverse: true,
         dragControl: 1,
-        textHeight: 90,        
+        textHeight: 60,        
         noSelect: true,
         lock: 'xy',
       });
@@ -371,7 +371,7 @@ export default {
       
       const { number } = this.config;      
       if(number>0 && number<=10){
-        window.TagCanvas.textHeight = 90;
+        window.TagCanvas.textHeight = 60;
       }else 
       {
         window.TagCanvas.textHeight = 40;
@@ -558,6 +558,7 @@ export default {
 
 .loader  {
     text-align: left;
+    margin-top: -20px;
     span.lo1 {
         display: inline-block;
         margin: -280px 40px 54px  -34px;
@@ -571,7 +572,7 @@ export default {
         display: inline-block;
         height: 80px;
         margin: -280px 40px 54px  -34px;
-        background:url("./assets/ablecom_nocove.png");
+        background:url("./assets/ablecom logo.png");
         //background-size: contain;
         background-size: 100% 100%;
         -webkit-animation: loader 10s infinite  linear;
@@ -619,6 +620,7 @@ export default {
 
 .loader2  {
     text-align: right;
+    margin-top: -20px;
     span.lo1 {
         display: inline-block;
         margin: -280px 40px 54px  -34px;
@@ -632,7 +634,7 @@ export default {
         display: inline-block;
         height: 80px;
         margin: -280px 40px 54px  -34px;
-        background:url("./assets/ablecom_nocove.png");
+        background:url("./assets/ablecom logo.png");
         //background-size: contain;
         background-size: 100% 100%;
         -webkit-animation: loader 10s infinite  linear;

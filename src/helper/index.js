@@ -42,8 +42,8 @@ export function conversionCategoryName(key) {
   let name = '';
   switch (key) {
     case 'firstPrize':
-      name = '一等奖';
-      break;
+      name = '一獎';
+      break;  
     default:
       break;
   }

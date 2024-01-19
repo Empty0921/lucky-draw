@@ -2,7 +2,7 @@
   <el-dialog
     :visible="visible"
     @close="$emit('update:visible', false)"
-    width="600px"
+    width="450px"
     class="c-Result"
     :append-to-body="true"
   >
@@ -40,7 +40,7 @@
         >
         
           {{  data }}:        
-          {{ listUser.find(x=>x.key===data).name }}
+          {{ listUser.length>0?listUser.find(x=>x.key===data)==undefined?'':listUser.find(x=>x.key===data).name:'' }}
         </span>
       </span>
     </div>
@@ -70,12 +70,12 @@ export default {
     },
     resultList() {
       const list = [];
-      console.log(this.listUser);
+      //console.log(this.listUser);
       
       for (const key in this.result) {
         if (this.result.hasOwnProperty(key)) {
           const element = this.result[key];
-          console.log(`element:${element}`);
+          //console.log(`element:${element}`);
           //console.log(`listUser:${this.listUser[element]}`);
           let name = conversionCategoryName(key);          
           list.push({
@@ -125,7 +125,7 @@ export default {
 <style lang="scss">
 .c-Result {
   .el-dialog__body {
-    max-height: 500px;
+    max-height: 300px;
     overflow-y: auto;
   }
   .listrow {
