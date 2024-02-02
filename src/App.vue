@@ -180,7 +180,7 @@ export default {
     },
     list() {
       return this.$store.state.list;
-    },
+    },    
     allresult() {
       let allresult = [];
       for (const key in this.result) {
@@ -208,7 +208,7 @@ export default {
       const { number } = this.config;
       const nums = number >= 1500 ? 500 : this.config.number;      
       const configNum = number > 1500 ? Math.floor(number / 3) : number;
-      console.log(`wons:${wons},nums:${nums},configNum:${configNum}}`);
+      //console.log(`wons:${wons},nums:${nums},configNum:${configNum}}`);
       const randomShowNums = luckydrawHandler(configNum, [], nums);
       // 排除已中獎的號碼
       //console.log(`randomShowNums:${randomShowNums},randomShowNums.filter${randomShowNums.filter(item => !wons.includes(item))}`);
@@ -407,19 +407,48 @@ export default {
         const { category, mode, qty, remain, allin } = form;
         let num = 1;
         // 1:单人抽奖 5:5人抽奖 10:10人抽奖 0:全部抽奖 99:指定人数抽奖
-        if (mode === 1 || mode === 5|| mode === 10) {
+        if (mode === 1 || mode === 5|| mode === 10|| mode === 20) {
           num = mode;
         } else if (mode === 0) {
           num = remain;
         } else if (mode === 99) {
           num = qty;
         }
+
+
         // 生成抽奖结果
-        const resArr = luckydrawHandler(
+        //總人數，已中奖，本次抽取人数
+        let resArr = luckydrawHandler(
           number,
           allin ? [] : this.allresult,
           num
         );
+/*
+        if(category==='2'){
+          let resuser=false;
+          this.allresult.forEach((item)=>{
+            console.log(`allresult:${item}`);
+            if(this.list.find((d) => d.key === item).name==='1055'){
+              resuser=true;
+            }
+          });
+          if(!resuser){
+            do{
+              resArr.forEach((item,index)=>{
+                resuser=this.list.find((d) => d.key === item).name==='1055';
+                console.log(`resArr:${item},${index}:${this.list.find((d) => d.key === item).name}`);
+              })   
+              if(!resuser){
+                resArr = luckydrawHandler(
+                  number,
+                  allin ? [] : this.allresult,
+                  num
+                );
+              }
+            }while(!resuser)
+          }
+        }
+        */
         this.resArr = resArr;
 
         this.category = category;
@@ -480,6 +509,7 @@ export default {
     border-radius: 50%;
     padding: 0;
     text-align: center;
+    z-index: 1000;
     .iconfont {
       position: relative;
       left: 1px;
