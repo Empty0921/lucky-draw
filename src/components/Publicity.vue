@@ -25,9 +25,15 @@ export default {
   name: 'Publicity',
   computed: {
     config() {
+      //	{"6":10,"7":10,"8":10,"9":10,"10":10,"name":"大訊/展訊尾牙抽奖","number":"140","firstPrize":1}
       return this.$store.state.config;
     },
+    listUser:{
+      get(){ return this.$store.state.list;},
+      //set(val){this.$store.commit('setList',val);}
+    },
     result() {
+      //	{"6":[12,65,20,137,98,23,49,5,27],"firstPrize":[]}
       return this.$store.state.result;
     },
     message() {
@@ -37,12 +43,21 @@ export default {
       let message = [{ key: 0, title: config.name }];
       fields.forEach((item, index) => {
         let label = conversionCategoryName(item);
+        
         if (result[item] && config[item] > 0) {
+          
+          let resultvalue='';
+          result[item].forEach((item)=>{
+            resultvalue+=this.listUser.find(x=>x.key===item).name +'、';
+          });
+
           message.push({
             key: index + 1,
             title: `${label}抽獎結果:`,
             value: `${
-              result[item].length > 0 ? result[item].join('、') : '暫未抽取'
+              //{{ listUser.length>0?listUser.find(x=>x.key===data)==undefined?'':listUser.find(x=>x.key===data).name:'' }}
+              result[item].length > 0 ? resultvalue : '暫未抽取'
+              //result[item].length > 0 ? result[item].join('、') : '暫未抽取'
             }`
           });
         }

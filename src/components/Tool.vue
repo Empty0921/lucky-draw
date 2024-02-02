@@ -51,6 +51,7 @@
             <el-option label="抽1人" :value="1"></el-option>
             <el-option label="抽5人" :value="5"></el-option>
             <el-option label="抽10人" :value="10"></el-option>
+            <el-option label="抽20人" :value="20"></el-option>
             <el-option label="一次抽取完" :value="0"></el-option>
             <el-option label="自定義" :value="99"></el-option>
           </el-select>
@@ -280,7 +281,7 @@ export default {
           return this.$message.error('本次抽獎人數已超過本獎項的剩余人數');
         }
       }
-      if (this.form.mode === 1 || this.form.mode === 5|| this.form.mode === 10) {
+      if (this.form.mode === 1 || this.form.mode === 5|| this.form.mode === 10|| this.form.mode === 20) {
         if (this.form.mode > this.remain) {
           return this.$message.error('本次抽獎人數已超過本獎項的剩余人數');
         }
